@@ -1,0 +1,20 @@
+{
+    "token": "",
+    "database": "",
+    "clientId": "",
+    "spotifyClientId": "",
+    "spotifySecret": "",
+    
+    "nodes": [
+        {
+            "id": "main",
+            "host": "node2.fluidnodes.com",
+            "port": 25572,
+            "password": "youshallnotpass",
+            "retryAmount": 15, 
+            "retryDelay": 6000
+        }
+    ]
+}
+
+
