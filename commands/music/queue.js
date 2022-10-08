@@ -1,38 +1,22 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const util = require("../../util/erelaUtil.js");
+const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
+const musicChecker = require("../../functions/musicChecker.js");
+const util = require("../../functions/erelaUtil.js");
 
 module.exports = {
-  name: "queue",
-  description: "View the queue.",
-  botPermissions: ["SendMessages", "EmbedLinks"],
+  data: new SlashCommandBuilder()
+    .setName("queue")
+    .setDescription("View the queue."),
 
   async execute(interaction, client) {
-    const { options, member, guild } = interaction;
 
-    const VoiceChannel = member.voice.channel;
-
-    if (!VoiceChannel)
-      return interaction.reply({
-        content:
-          "🔸 |  You aren't in a voice channel. Join one to be able to play music! Already in a voice channel? Make sure I have permission to see it.",
-        ephemeral: true,
-      });
-
-    if (
-      guild.members.me.voice.channelId &&
-      VoiceChannel.id !== guild.members.me.voice.channelId
-    )
-      return interaction.reply({
-        content: `🔸 |  I'm already playing music in <#${guild.me.voice.channelId}>.`,
-        ephemeral: true,
-      });
+    if (await musicChecker.vc(interaction)) return;
 
     const player = client.manager.create({
-      guild: interaction.guild.id,
-      voiceChannel: member.voice.channel.id,
-      textChannel: interaction.channelId,
-      selfDeafen: true,
-      volume: 50,
+        guild: interaction.guild.id,
+        voiceChannel: interaction.member.voice.channel.id,
+        textChannel: interaction.channelId,
+        selfDeafen: true,
+        volume: 50
     });
 
     if (!player.queue.length)
@@ -48,7 +32,7 @@ module.exports = {
 
     const queueEmbed = new EmbedBuilder()
       .setColor("Blurple")
-      .setTitle(`Current queue for ${guild.name}`)
+      .setTitle(`Current queue for ${interaction.guild.name}`)
       .setDescription(chunked[0])
       .setTimestamp();
 

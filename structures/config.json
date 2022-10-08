@@ -2,13 +2,11 @@
     "token": "",
     "database": "",
     "clientId": "",
-    "spotifyClientId": "",
-    "spotifySecret": "",
     
     "nodes": [
         {
             "id": "main",
-            "host": "node2.fluidnodes.com",
+            "host": "132.145.18.192",
             "port": 25572,
             "password": "youshallnotpass",
             "retryAmount": 15, 
@@ -16,5 +14,3 @@
         }
     ]
 }
-
-

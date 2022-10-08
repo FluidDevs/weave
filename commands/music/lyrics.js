@@ -1,43 +1,26 @@
-const { EmbedBuilder,PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
+const musicChecker = require("../../functions/musicChecker.js");
 const genius = require("genius-lyrics");
 const gClient = new genius.Client();
 
 module.exports = {
-  name: "lyrics",
-  description: "Lyrics for the current song.",
-  botPermissions: ["SendMessages", "EmbedLinks"],
-
+  data: new SlashCommandBuilder()
+    .setName("lyrics")
+    .setDescription("Lyrics for the current song."),
+    
   async execute(interaction, client) {
 
-    const { options, member, guild } = interaction;
-
-    const VoiceChannel = member.voice.channel;
-
-    if (!VoiceChannel)
-    return interaction.reply({
-      content:
-        "🔸 |  You aren't in a voice channel. Join one to be able find the lyrics.",
-      ephemeral: true,
-    });
+    if (await musicChecker.vc(interaction)) return;
 
     const player = client.manager.create({
-      guild: interaction.guild.id,
-      voiceChannel: member.voice.channel.id,
-      textChannel: interaction.channelId,
-      selfDeafen: true,
+        guild: interaction.guild.id,
+        voiceChannel: interaction.member.voice.channel.id,
+        textChannel: interaction.channelId,
+        selfDeafen: true,
+        volume: 50
     });
-
-    if (!player.playing && !player.paused)
-      return interaction.reply({
-        content: "🔸 |  There is nothing in the queue.",
-        ephemeral: true,
-      });
-
-    if (player.paused)
-      return interaction.reply({
-        content: "🔸 |  Resume the player to view the lyrics.",
-        ephemeral: true,
-      });
+    
+    if (await musicChecker.playing(interaction, player)) return;
 
     await interaction.deferReply();
 

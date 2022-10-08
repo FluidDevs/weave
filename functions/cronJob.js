@@ -6,7 +6,7 @@ module.exports = async (client) => {
   var saveQueueJob = new CronJob("*/10 * * * *", async () => {
     const queueObj = {};
     for (keyValue of client.manager.players) {
-      try {
+        if (!keyValue[1].queue.current.uri) continue;
         queueObj[keyValue[0]] = {
           options: keyValue[1].options,
           queue: [
@@ -24,16 +24,13 @@ module.exports = async (client) => {
           trackRepeat: keyValue[1].trackRepeat,
           queueRepeat: keyValue[1].queueRepeat,
         };
-      } catch (error) {
-        console.error(keyValue + "Errored on queue save");
-      }
     }
 
     queueJSON = JSON.stringify(queueObj);
 
     fs.writeFile("json/tempQueue.json", queueJSON, () => {});
 
-    client.channels.cache.get("").send({
+    client.channels.cache.get("1025532328258310175").send({
       embeds: [
         new EmbedBuilder()
           .setColor("Green")
@@ -42,6 +39,7 @@ module.exports = async (client) => {
       ],
     });
   });
+
 
   saveQueueJob.start();
 };

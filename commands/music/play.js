@@ -1,55 +1,40 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
+const musicChecker = require("../../functions/musicChecker.js");
 
 module.exports = {
-    name: "play",
-    description: "Play a song.",
-    botPermissions: ["SendMessages", "EmbedLinks", "AttachFiles", "ManageMessages"],
-    options: [
-        {
-            name: "query",
-            description: "Provide the name of the song or URL.",
-            type: 3,
-            required: true
-        }
-    ],
+    data: new SlashCommandBuilder()
+        .setName("play")
+        .setDescription("Play a song.")
+        .addStringOption(option => option.setName("query").setDescription("Provide the name of the song or URL.").setRequired(true)),
+
     async execute(interaction, client) {
 
     function msToTime(duration) {
-        var milliseconds = Math.floor((duration % 1000) / 100),
             seconds = Math.floor((duration / 1000) % 60),
             minutes = Math.floor((duration / (1000 * 60)) % 60),
             hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-        
-        hours = (hours < 10) ? "0" + hours : hours;
-        minutes = (minutes < 10) ? "0" + minutes : minutes;
-        seconds = (seconds < 10) ? "0" + seconds : seconds;
-        
-        return minutes + ":" + seconds;
+            
+            hours = (hours < 10) ? "0" + hours : hours;
+            minutes = (minutes < 10) ? "0" + minutes : minutes;
+            seconds = (seconds < 10) ? "0" + seconds : seconds;
+            
+            return minutes + ":" + seconds;
         }
-          
-        const { options, member, guild } = interaction;
-        
-        const VoiceChannel = member.voice.channel;
-
-        if (!VoiceChannel) return interaction.reply({ content: "🔸 |  You aren't in a voice channel. Join one to be able to play music! Already in a voice channel? Make sure I have permission to see it.", ephemeral: true });
-
-        if (guild.members.me.voice.channelId && VoiceChannel.id !== guild.members.me.voice.channelId) return interaction.reply({ content: `🔸 |  I'm already playing music in <#${guild.me.voice.channelId}>.`, ephemeral: true });
-
-        if(!VoiceChannel.joinable) return interaction.reply({ content: "🔸 |  I do not have permission to join your voice channel.", ephemeral: true})
+                  
+        if (await musicChecker.vc(interaction)) return;
 
         const player = client.manager.create({
             guild: interaction.guild.id,
-            voiceChannel: member.voice.channel.id,
+            voiceChannel: interaction.member.voice.channel.id,
             textChannel: interaction.channelId,
             selfDeafen: true,
             volume: 50
         });
         
-        let res;
 
         const query = interaction.options.getString("query");
 
-        res = await player.search(query, interaction.user);
+        let res = await player.search(query, interaction.user);
 
         if (res.loadType === "LOAD_FAILED") {
             if (!player.queue.current) player.destroy();
@@ -67,7 +52,7 @@ module.exports = {
             player.pause(false)
             if (!player.playing && !player.paused && player.queue.totalSize === res.tracks.length) player.play();
             const playlistEmbed = new EmbedBuilder()
-                .setDescription(`🔹 |  **[${res.playlist.name}](${query})** [${member}]has been added to the queue.`)
+                .setDescription(`🔹 |  **[${res.playlist.name}](${query})** has been added to the queue. [${interaction.member}]`)
                 .addFields({ name: "Enqueued", value: `\`${res.tracks.length}\` tracks`})
                 .setTimestamp()
                 .setColor("Blurple")
@@ -86,7 +71,7 @@ module.exports = {
 
         const enqueueEmbed = new EmbedBuilder()
             .setColor("Blurple")
-            .setDescription(`🔹 |  Enqueued **[${res.tracks[0].title}](${res.tracks[0].uri})** [${msToTime(res.tracks[0].duration) || "Undetermined"} - ${member}]`)
+            .setDescription(`🔹 |  Enqueued **[${res.tracks[0].title}](${res.tracks[0].uri})** [${msToTime(res.tracks[0].duration) || "Undetermined"} - ${interaction.member}]`)
             .setTimestamp()
         await interaction.reply({ embeds: [enqueueEmbed] });
 
@@ -94,8 +79,8 @@ module.exports = {
 
         if (player.queue.totalSize > 1)
             enqueueEmbed.addFields({ name:"Position in queue", value: `${player.queue.size - 0}` });
-            if (player.trackRepeat == true) enqueueEmbed.addFields({name:"Looping", value:"Song"});
-            if (player.queueRepeat == true) enqueueEmbed.addFields({name:"Looping", value:"Queue"});
+            if (player.trackRepeat) enqueueEmbed.addFields({name:"Looping", value:"Song"});
+            if (player.queueRepeat) enqueueEmbed.addFields({name:"Looping", value:"Queue"});
         return interaction.editReply({ embeds: [enqueueEmbed] })
 
 

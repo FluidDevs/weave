@@ -1,20 +1,12 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
-    name: "player-announce",
-    description: "Send an annoucement to active players.",
-    options: [
-        {
-            name: "message",
-            description: "Message to send.",
-            type: 3,
-            required: true,
-        },
-    ],
+    data: new SlashCommandBuilder()
+        .setName("player-announce")
+        .setDescription("Send an annoucement to active players.")
+        .addStringOption((option) => option.setName("message").setDescription("Message to send.").setRequired(true)),
 
     async execute(interaction, client) {
-
-        if (interaction.user.id !== "") return;
 
         message = interaction.options.getString("message")
 
@@ -32,6 +24,8 @@ module.exports = {
 
             channel = await client.channels.cache.get(player.textChannel)
 
+            if(!channel) continue;
+            
             if (!channel.permissionsFor(channel.guild.members.me).has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.AttachFiles,])) continue;
 
             await channel.send({ embeds: [embed]})

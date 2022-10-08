@@ -1,5 +1,6 @@
 const { promisify } = require("util");
-const { glob } = require("glob");
+const glob = require("glob");
+const chalk = require("chalk");
 const PG = promisify(glob);
 
 module.exports = async (client) => {
@@ -19,5 +20,6 @@ module.exports = async (client) => {
     }
   );
 
-  log.startup("Events Loaded");
+  console.log(chalk.blueBright(`[Startup] >>> Events loaded successfully.`));  
 };
+  

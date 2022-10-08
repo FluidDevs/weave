@@ -1,12 +1,12 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } = require("discord.js");
 const fs = require("fs");
 
 module.exports = {
-  name: "reboot",
-  description: "Save current players and reboot ready Weave.",
-
+  data: new SlashCommandBuilder()
+    .setName("reboot")
+    .setDescription("Save current players and reboot ready Weave."),
+    
   async execute(interaction, client) {
-    if (interaction.user.id !== "") return;
 
     embed = new EmbedBuilder()
       .setColor("Red")
@@ -20,7 +20,10 @@ module.exports = {
 
     for (player of client.manager.players.values()) {
       if (client.channels.cache.get(player.textChannel)) {
+        
         channel = client.channels.cache.get(player.textChannel);
+
+        if (!channel) continue;
 
         if (
           !channel
@@ -57,7 +60,9 @@ module.exports = {
           trackRepeat: keyValue[1].trackRepeat,
           queueRepeat: keyValue[1].queueRepeat,
         };
-      } catch (error) {}
+      } catch (error) {
+        console.error(error);
+      }
     }
     queueJSON = JSON.stringify(queueObj);
 
@@ -67,5 +72,6 @@ module.exports = {
       content: `\`${sent} / ${client.manager.players.size}\` recieved the reboot message. Now ready to reboot!`,
       embeds: [embed],
     });
+
   },
 };

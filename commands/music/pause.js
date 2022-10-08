@@ -1,56 +1,30 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
+const musicChecker = require("../../functions/musicChecker.js");
 
 module.exports = {
-  name: "pause",
-  description: "Pause the current song.",
-  botPermissions: ["SendMessages", "EmbedLinks"],
+  data: new SlashCommandBuilder()
+    .setName("pause")
+    .setDescription("Pause the current song."),
 
   async execute(interaction, client) {
-    const { options, member, guild } = interaction;
 
-    const VoiceChannel = member.voice.channel;
-
-    if (!VoiceChannel)
-      return interaction.reply({
-        content:
-          "🔸 |  You aren't in a voice channel. Join one to be able to play music! Already in a voice channel? Make sure I have permission to see it.",
-        ephemeral: true,
-      });
-
-    if (
-      guild.members.me.voice.channelId &&
-      VoiceChannel.id !== guild.members.me.voice.channelId
-    )
-      return interaction.reply({
-        content: `🔸 |  I'm already playing music in <#${guild.me.voice.channelId}>.`,
-        ephemeral: true,
-      });
+    if (await musicChecker.vc(interaction)) return;
 
     const player = client.manager.create({
-      guild: interaction.guild.id,
-      voiceChannel: member.voice.channel.id,
-      textChannel: interaction.channelId,
-      selfDeafen: true,
-      volume: 50,
+        guild: interaction.guild.id,
+        voiceChannel: interaction.member.voice.channel.id,
+        textChannel: interaction.channelId,
+        selfDeafen: true,
+        volume: 50
     });
-
-    if (!player.playing && !player.paused)
-      return interaction.reply({
-        content: "🔸 |  There is nothing in the queue.",
-        ephemeral: true,
-      });
-
-    if (player.paused)
-      return interaction.reply({
-        content: "🔸 |  The player is already paused.",
-        ephemeral: true,
-      });
+    
+    if (await musicChecker.playing(interaction, player)) return;
 
     await player.pause(true);
 
     const pauseEmbed = new EmbedBuilder()
       .setColor("Blurple")
-      .setDescription(`🔹 | Paused [${member}]`)
+      .setDescription(`🔹 | Paused [${interaction.member}]`)
       .setTimestamp();
     return interaction.reply({
       embeds: [pauseEmbed],

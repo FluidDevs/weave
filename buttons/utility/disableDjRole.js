@@ -3,8 +3,7 @@ const DB = require("../../structures/schemas/djConfig");
 
 module.exports = {
     id: "disableDjRole",
-    permission: [PermissionFlagsBits.Administrator],
-    botPermissions: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.AttachFiles],
+    userPermissions: [PermissionFlagsBits.Administrator],
 
     async execute(interaction, client) {
 

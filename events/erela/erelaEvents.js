@@ -7,12 +7,12 @@ const {
   PermissionFlagsBits,
   ButtonStyle
 } = require("discord.js");
+const chalk = require("chalk");
 
 function msToTime(duration) {
-  var milliseconds = Math.floor((duration % 1000) / 100),
-    seconds = Math.floor((duration / 1000) % 60),
-    minutes = Math.floor((duration / (1000 * 60)) % 60),
-    hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+  seconds = Math.floor((duration / 1000) % 60),
+  minutes = Math.floor((duration / (1000 * 60)) % 60),
+  hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
 
   hours = hours < 10 ? "0" + hours : hours;
   minutes = minutes < 10 ? "0" + minutes : minutes;
@@ -46,53 +46,73 @@ const row = new ActionRowBuilder().addComponents(
 
 client.manager
   .on("nodeConnect", (node) => {
-    log.startup(
-      `[Erela] >> Connection has been established to "${node.options.identifier}".`
+    console.log(
+      chalk.green(
+        `[Erela] >>> Connection has been established to "${
+          node.options.identifier
+        }".`
+      )
     );
   })
 
   .on("nodeDisconnect", (node, error) => {
-    log.startup(
-      `[Erela] >> Lost connection to "${node.options.identifier}" due to an error: ${error.message}.`
+    console.log(
+      chalk.red(
+        `[Erela] >>> Lost connection to "${
+          node.options.identifier
+        }" due to an error: ${error.message}.`
+      )
     );
   })
 
   .on("nodeError", (node, error) => {
-    log.startup(
-      `[Erela] >> Node "${node.options.identifier}" has encountered an error: ${error.message}.`
+    console.log(
+      chalk.red(
+        `[Erela] >>> Node "${node.options.identifier}" has encountered an error: ${error.message}.`
+      )
     );
   })
 
   .on("trackEnd", async (player, track) => {
-  
-    if(!client.channels.cache.get(player.textChannel)) return;
+
+    const dbFoundCounter = await DB_COUNTER.findOne({
+      ident: "counter",
+    });
+    if (dbFoundCounter)
+      await dbFoundCounter.updateOne({
+        songsPlayed: dbFoundCounter.songsPlayed + 1,
+      });
+      
+    if (!client.channels.cache.get(player.textChannel)) return;
 
     if (client.channels.cache.get(player.textChannel)) {
-
       const playerChannel = client.channels.cache.get(player.textChannel);
 
       messageID = client.nowPlaying.get(player.guild); //Fetch message id from collection with key as player.guild (aka guildID)
 
-      if(!playerChannel.messages.fetch(messageID)) return;
+      if (
+        !playerChannel
+          .permissionsFor(playerChannel.guild.members.me)
+          .has([
+            PermissionFlagsBits.SendMessages,
+            PermissionFlagsBits.EmbedLinks,
+            PermissionFlagsBits.AttachFiles,
+          ])
+      )
+        return;
+        
+      if (!playerChannel.messages.fetch(messageID)) return;
 
       const fetchedMessage = await playerChannel.messages.fetch(messageID); //Fetch the message
 
       if (fetchedMessage.deletable) await fetchedMessage.delete(); //Check if deleteable then delete message
 
       // DB fetch and update counter
-
-      const dbFoundCounter = await DB_COUNTER.findOne({
-        ident: "counter",
-      });
-      if (dbFoundCounter)
-        await dbFoundCounter.updateOne({
-          songsPlayed: dbFoundCounter.songsPlayed + 1,
-        });
     }
   })
 
   .on("trackStart", async (player, track) => {
-    if(!client.channels.cache.get(player.textChannel)) return;
+    if (!client.channels.cache.get(player.textChannel)) return;
 
     if (client.channels.cache.get(player.textChannel)) {
       const playerChannel = client.channels.cache.get(player.textChannel);
@@ -105,12 +125,15 @@ client.manager
             PermissionFlagsBits.EmbedLinks,
             PermissionFlagsBits.AttachFiles,
           ])
-      ) return;
+      )
+        return;
 
       trackStartEmbed = new EmbedBuilder()
         .setColor("Blurple")
         .setImage(track.displayThumbnail("maxresdefault"))
         .setTimestamp();
+
+      // .setDescription(`🔹 |  Now Playing **[${track.title}](${track.uri})** [${msToTime(track.duration) || "Undetermined"} - <@${track.requester.id}>]`)
 
       trackStartEmbed.setDescription(
         `🔹 |  Now Playing **[${track.title}](${track.uri})** [${
@@ -141,15 +164,14 @@ client.manager
   })
 
   .on("queueEnd", async (player, track) => {
-
-    if(!client.channels.cache.get(player.textChannel)) return;
+    if (!client.channels.cache.get(player.textChannel)) return;
 
     if (client.channels.cache.get(player.textChannel)) {
       const playerChannel = client.channels.cache.get(player.textChannel);
 
       messageID = client.nowPlaying.get(player.guild); //Fetch message id from collection with key as player.guild (aka guildID)
 
-      if(!playerChannel.messages.fetch(messageID)) return;
+      if (!playerChannel.messages.fetch(messageID)) return;
 
       const fetchedMessage = await playerChannel.messages.fetch(messageID); //Fetch the message
 
@@ -165,7 +187,8 @@ client.manager
             PermissionFlagsBits.EmbedLinks,
             PermissionFlagsBits.AttachFiles,
           ])
-      ) return;
+      )
+        return;
 
       const leaveEmbed = new EmbedBuilder()
         .setColor("Blurple")

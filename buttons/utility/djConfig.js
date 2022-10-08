@@ -8,12 +8,7 @@ const {
 
 module.exports = {
   id: "djConfig",
-  permission: [PermissionFlagsBits.Administrator],
-  botPermissions: [
-    PermissionFlagsBits.SendMessages,
-    PermissionFlagsBits.EmbedLinks,
-    PermissionFlagsBits.AttachFiles,
-  ],
+  userPermissions: [PermissionFlagsBits.Administrator],
 
   async execute(interaction, client) {
     const row = new ActionRowBuilder().addComponents(

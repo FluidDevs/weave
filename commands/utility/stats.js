@@ -1,10 +1,10 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, SlashCommandBuilder } = require("discord.js");
 const DB_COUNTER = require("../../structures/schemas/songsPlayed");
 
 module.exports = {
-    name: "stats",
-    description: "View Weave stats.",
-    botPermissions: ["SendMessages", "EmbedLinks"],
+	data: new SlashCommandBuilder()
+		.setName('stats')
+		.setDescription("View Weave's Stats."),
 
     async execute(interaction, client) {
 

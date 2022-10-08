@@ -1,9 +1,9 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
-    name: "commands",
-    description: "View all the commands.",
-    botPermissions: ["SendMessages", "EmbedLinks"],
+	data: new SlashCommandBuilder()
+		.setName('commands')
+		.setDescription('View all the commands.'),
 
     async execute(interaction, client) {
 

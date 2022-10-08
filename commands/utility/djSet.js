@@ -1,19 +1,12 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } = require("discord.js");
 const DB = require("../../structures/schemas/djConfig");
 
 module.exports = {
-    name: "dj-set",
-    description: "Set the DJ Role.",
+	data: new SlashCommandBuilder()
+		.setName('dj-set')
+		.setDescription('Set the dj role.')
+        .addRoleOption(option => option.setName('role').setDescription('DJ Role.').setRequired(true)),
     userPermissions: ["Administrator"],
-    botPermissions: ["SendMessages", "EmbedLinks"],
-    options: [
-        {
-            name: "role",
-            description: "DJ Role.",
-            type: 8,
-            required: true,
-        },
-    ],
 
     /**
      * 
