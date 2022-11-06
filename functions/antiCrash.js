@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
-const { time } = require('@discordjs/builders')
+const { time } = require('discord.js')
 const { inspect } = require('util')
 
 module.exports = async (client) => {
