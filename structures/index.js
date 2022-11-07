@@ -16,6 +16,8 @@ client.buttons = new Collection();
 client.nowPlaying = new Collection();
 client.djConfig = new Collection();
 
+client.config = require("./config.json");
+
 require("../functions/buttonHandler")(client);
 require("../functions/eventHandler")(client);
 require("../functions/erelaHandler")(client);
