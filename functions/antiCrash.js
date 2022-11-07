@@ -10,14 +10,20 @@ module.exports = async (client) => {
       const date = new Date()
       const relative = time(date, 'F')
 
-      const channel = client.channels.cache.get("1010992700448837763")
+      const channel = client.channels.cache.get(client.config.logChannelId)
+
+      if(!channel) return;
 
         const embed = new EmbedBuilder()
         .setTitle("Error")
         .setDescription(`**From:** \`unhandledRejection\`\n**Time:** ${relative}\n\n**Error:**\`\`\`${inspect(err, {depth: 0})}\`\`\``)
         .setColor("Red")
     
-        await channel.send({ embeds: [embed] }).catch(console.log)
+        try {
+          await channel.send({ embeds: [embed] }).catch(console.log)
+        } catch(e) {
+          console.log(e)
+        }
   });
 
   process.on("uncaughtException", async (err) => {
@@ -26,14 +32,20 @@ module.exports = async (client) => {
     const date = new Date()
     const relative = time(date, 'F')
 
-    const channel = client.channels.cache.get("1010992700448837763")
+    const channel = client.channels.cache.get(client.config.logChannelId)
+
+    if(!channel) return;
 
       const embed = new EmbedBuilder()
       .setTitle("Error")
       .setDescription(`**From:** \`uncaughtException\`\n**Time:** ${relative}\n\n**Error:**\`\`\`${inspect(err, {depth: 0})}\`\`\``)
       .setColor("Red")
   
-      await channel.send({ embeds: [embed] }).catch(console.log)
+        try {
+          await channel.send({ embeds: [embed] }).catch(console.log)
+        } catch(e) {
+          console.log(e)
+        }
 
   });
 };

@@ -28,6 +28,8 @@ async function load (client) {
 
 async function loadAdmin (client) {
 
+  if(!client.config.guildId) return console.log(chalk.redBright("[Startup] >>> No guildId provided in config.json. Admin commands will not be loaded."));
+
   let adminCommandsArray = [];
 
   (await PG(`${process.cwd().replace(/\\/g, "/")}/adminCommands/*/*.js`)).map(
@@ -43,7 +45,7 @@ async function loadAdmin (client) {
 
   const rest = new REST({ version: '10' }).setToken(token);
 
-  rest.put(Routes.applicationGuildCommands(clientId, "1005770275008294992"), { body: adminCommandsArray })
+  rest.put(Routes.applicationGuildCommands(clientId, client.config.guildId), { body: adminCommandsArray })
       .then(data => console.log(chalk.blueBright(`[Startup] >>> Successfully registered ${data.length} admin guild commands.`)))
 }
 

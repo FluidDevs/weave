@@ -32,7 +32,7 @@ async function load(client) {
     }
     console.log(chalk.blueBright("[Startup] >>> Reloaded all players / songs."));
 
-    client.channels.cache.get("1010992925355806760").send({
+    client.channels.cache.get(client.config.logChannelId).send({
       embeds: [
         new EmbedBuilder()
           .setColor("Green")

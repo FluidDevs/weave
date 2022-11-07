@@ -2,7 +2,8 @@
     "token": "",
     "database": "",
     "clientId": "",
-    
+    "guildId": "",
+    "logChannelId": "",
     "nodes": [
         {
             "id": "main",
